@@ -1,17 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>GodField-like Game</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GodArea - Online Game</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    #gameArea { display: none; }
+    .player { margin-bottom: 10px; }
+  </style>
 </head>
 <body>
-  <div id="game">
-    <h1>神の戦場</h1>
-    <div id="player-info"></div>
-    <div id="hand"></div>
-    <button id="end-turn">ターン終了</button>
+  <h1>Welcome to GodArea!</h1>
+  <div id="setup">
+    <label for="playerName">Enter your name:</label>
+    <input type="text" id="playerName">
+    <button id="createRoom">Create Room</button>
+    <br>
+    <label for="roomId">Room ID:</label>
+    <input type="text" id="roomId">
+    <button id="joinRoom">Join Room</button>
   </div>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="script.js"></script>
+
+  <div id="gameArea">
+    <h2>Room: <span id="roomIdDisplay"></span></h2>
+    <h3>Players:</h3>
+    <ul id="playerList"></ul>
+    <button id="startGame">Start Game</button>
+    <div id="gameStatus"></div>
+    <div id="hand"></div>
+    <button id="playCard" style="display:none;">Play Card</button>
+    <button id="nextTurn" style="display:none;">Next Turn</button>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
