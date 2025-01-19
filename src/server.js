@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-// /opt/render/project の構造をログに出力
-const projectPath = '/opt/render/project/';
-fs.readdir(projectPath, { withFileTypes: true }, (err, files) => {
+// src ディレクトリの中身を表示
+const srcPath = path.resolve(__dirname);
+fs.readdir(srcPath, { withFileTypes: true }, (err, files) => {
     if (err) {
-        console.error('Error reading project directory:', err);
+        console.error('Error reading src directory:', err);
     } else {
-        console.log('Project directory structure:');
+        console.log('src directory structure:');
         files.forEach(file => console.log(file.name));
     }
 });
