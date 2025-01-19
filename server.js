@@ -4,7 +4,7 @@ const socketIo = require('socket.io');
 const path = require('path');
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = require('socket.io')(server);
 const port = process.env.PORT || 3000;
 
 // Public フォルダへの正しいパスを設定
@@ -17,6 +17,24 @@ app.use(express.static(publicPath));
 app.get('/', (req, res) => {
   res.sendFile(path.join(publicPath, 'index.html'));
 });
+
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  // クライアントからのメッセージを受信
+  socket.on('message', (msg) => {
+    console.log('Message from client:', msg);
+
+    // クライアントにメッセージを返す
+    socket.emit('message', 'Hello from server!');
+  });
+
+  // クライアントが切断したとき
+  socket.on('disconnect', () => {
+    console.log('A user disconnected:', socket.id);
+  });
+});
+
 
 const { generateRoomId, generateDeck, dealCards } = require('./gameLogic');
 const { addPlayer, getPlayersInRoom, removePlayer } = require('./players');

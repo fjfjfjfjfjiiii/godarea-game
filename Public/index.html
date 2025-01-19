@@ -12,6 +12,22 @@
   </style>
 </head>
 <body>
+
+<script>
+    const socket = io();
+  
+    socket.on('connect', () => {
+      console.log('Connected to server!');
+    });
+  
+    socket.on('message', (msg) => {
+      console.log('Message from server:', msg);
+    });
+  
+    // サーバーにメッセージを送信
+    socket.emit('message', 'Hello from client!');
+</script>
+  
   <h1>Welcome to GodArea!</h1>
   <div id="setup">
     <label for="playerName">Enter your name:</label>
