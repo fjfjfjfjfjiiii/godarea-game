@@ -1,13 +1,14 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const path = require('path');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 const port = process.env.PORT || 3000;
 
 // Public フォルダへの正しいパスを設定
-const publicPath = path.resolve(__dirname, '../Public');
+const publicPath = path.resolve(__dirname, 'Public');
 
 // 静的ファイルを提供
 app.use(express.static(publicPath));
@@ -20,10 +21,8 @@ app.get('/', (req, res) => {
 const { generateRoomId, generateDeck, dealCards } = require('./gameLogic');
 const { addPlayer, getPlayersInRoom, removePlayer } = require('./players');
 
-app.use(express.static('public'));
-
 io.on('connection', (socket) => {
-  console.log('a user connected', socket.id);
+  console.log('A user connected:', socket.id);
 
   socket.on('createRoom', (playerName) => {
     const roomId = generateRoomId();
@@ -34,7 +33,9 @@ io.on('connection', (socket) => {
 
   socket.on('joinRoom', (data) => {
     const { playerName, roomId } = data;
-    if (getPlayersInRoom(roomId).length < 2) {
+    const players = getPlayersInRoom(roomId);
+
+    if (players.length < 2) {
       addPlayer(roomId, playerName, socket.id);
       socket.join(roomId);
       io.to(roomId).emit('playerList', getPlayersInRoom(roomId));
@@ -53,20 +54,22 @@ io.on('connection', (socket) => {
   });
 
   socket.on('playCard', (data) => {
-    // カードを使用するロジック
     const { roomId, playerName, cardIndex } = data;
     const players = getPlayersInRoom(roomId);
     const player = players.find(p => p.name === playerName);
-    player.hp -= 5; // ダメージ例
 
-    io.to(roomId).emit('turnPlayed', { currentPlayer: 1, playerHp: player.hp });
+    if (player) {
+      player.hp -= 5; // ダメージの例
+      io.to(roomId).emit('turnPlayed', { currentPlayer: 1, playerHp: player.hp });
+    }
   });
 
   socket.on('disconnect', () => {
     removePlayer(socket.id);
+    console.log('A user disconnected:', socket.id);
   });
 });
 
-server.listen(3000, () => {
-  console.log('Server listening on http://localhost:3000');
+server.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
