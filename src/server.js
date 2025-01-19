@@ -6,12 +6,15 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const port = process.env.PORT || 3000;
 
+// Public フォルダへの正しいパスを設定
+const publicPath = path.resolve(__dirname, '../Public');
 
+// 静的ファイルを提供
+app.use(express.static(publicPath));
 
-// ルートにアクセスしたときにindex.htmlを返す
+// ルートアクセス時に index.html を返す
 app.get('/', (req, res) => {
-  console.log('Accessing /');
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  res.sendFile(path.join(publicPath, 'index.html'));
 });
 
 const { generateRoomId, generateDeck, dealCards } = require('./gameLogic');
