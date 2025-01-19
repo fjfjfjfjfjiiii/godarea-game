@@ -13,33 +13,25 @@
 </head>
 <body>
 
-<script>
-    const socket = io();
-  
-    socket.on('connect', () => {
-      console.log('Connected to server!');
-    });
-  
-    socket.on('message', (msg) => {
-      console.log('Message from server:', msg);
-    });
-  
-    // サーバーにメッセージを送信
-    socket.emit('message', 'Hello from client!');
-</script>
-  
   <h1>Welcome to GodArea!</h1>
+  
+  <!-- 名前入力画面 -->
   <div id="setup">
     <label for="playerName">Enter your name:</label>
-    <input type="text" id="playerName">
-    <button id="createRoom">Create Room</button>
-    <br>
-    <label for="roomId">Room ID:</label>
+    <input type="text" id="playerName" required>
+    <button id="setName">Set Name</button>
+  </div>
+
+  <!-- 部屋作成 or 参加選択 -->
+  <div id="roomSelection" style="display: none;">
+    <label for="roomId">Enter Room ID (if joining):</label>
     <input type="text" id="roomId">
+    <button id="createRoom">Create Room</button>
     <button id="joinRoom">Join Room</button>
   </div>
 
-  <div id="gameArea">
+  <!-- ゲームエリア -->
+  <div id="gameArea" style="display: none;">
     <h2>Room: <span id="roomIdDisplay"></span></h2>
     <h3>Players:</h3>
     <ul id="playerList"></ul>
@@ -50,6 +42,88 @@
     <button id="nextTurn" style="display:none;">Next Turn</button>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    const socket = io();
+    let playerName = '';
+    let roomId = '';
+
+    // サーバー接続時
+    socket.on('connect', () => {
+      console.log('Connected to server!');
+    });
+
+    // 部屋番号を作成したとき
+    socket.on('roomCreated', (data) => {
+      roomId = data.roomId;
+      $('#roomIdDisplay').text(roomId);
+      $('#setup').hide();
+      $('#roomSelection').hide();
+      $('#gameArea').show();
+      console.log('Room created:', roomId);
+    });
+
+    // プレイヤーリストを更新
+    socket.on('playerList', (players) => {
+      $('#playerList').empty();
+      players.forEach(player => {
+        $('#playerList').append(`<li>${player.name}</li>`);
+      });
+    });
+
+    // ゲーム開始
+    socket.on('gameStarted', (data) => {
+      $('#gameStatus').text('Game started! Current player: ' + data.currentPlayer);
+      $('#startGame').hide();
+      $('#playCard').show();
+      $('#nextTurn').show();
+    });
+
+    // 部屋に入れなかった場合
+    socket.on('error', (message) => {
+      alert(message);
+    });
+
+    // 名前設定ボタン
+    $('#setName').click(() => {
+      playerName = $('#playerName').val();
+      if (playerName) {
+        $('#setup').hide();
+        $('#roomSelection').show();
+      } else {
+        alert('Please enter a name');
+      }
+    });
+
+    // 部屋作成
+    $('#createRoom').click(() => {
+      if (playerName) {
+        socket.emit('createRoom', playerName);
+      }
+    });
+
+    // 部屋に参加
+    $('#joinRoom').click(() => {
+      const roomIdInput = $('#roomId').val();
+      if (roomIdInput && playerName) {
+        socket.emit('joinRoom', { playerName, roomId: roomIdInput });
+      }
+    });
+
+    // ゲーム開始ボタン
+    $('#startGame').click(() => {
+      socket.emit('startGame', roomId);
+    });
+
+    // カードプレイ
+    $('#playCard').click(() => {
+      socket.emit('playCard', { roomId, playerName, cardIndex: 0 });
+    });
+
+    // 次のターン
+    $('#nextTurn').click(() => {
+      socket.emit('nextTurn', roomId);
+    });
+  </script>
+
 </body>
 </html>

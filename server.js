@@ -4,7 +4,7 @@ const socketIo = require('socket.io');
 const path = require('path');
 const app = express();
 const server = http.createServer(app);
-const io = require('socket.io')(server);
+const io = socketIo(server);
 const port = process.env.PORT || 3000;
 
 // Public フォルダへの正しいパスを設定
@@ -18,30 +18,20 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(publicPath, 'index.html'));
 });
 
-io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
-
-  // クライアントからのメッセージを受信
-  socket.on('message', (msg) => {
-    console.log('Message from client:', msg);
-
-    // クライアントにメッセージを返す
-    socket.emit('message', 'Hello from server!');
-  });
-
-  // クライアントが切断したとき
-  socket.on('disconnect', () => {
-    console.log('A user disconnected:', socket.id);
-  });
-});
-
-
 const { generateRoomId, generateDeck, dealCards } = require('./gameLogic');
 const { addPlayer, getPlayersInRoom, removePlayer } = require('./players');
 
+// 部屋作成・参加イベント
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
+  // メッセージの受信
+  socket.on('message', (msg) => {
+    console.log('Message from client:', msg);
+    socket.emit('message', 'Hello from server!');
+  });
+
+  // 部屋作成イベント
   socket.on('createRoom', (playerName) => {
     const roomId = generateRoomId();
     addPlayer(roomId, playerName, socket.id);
@@ -49,6 +39,7 @@ io.on('connection', (socket) => {
     socket.emit('roomCreated', { roomId, playerName });
   });
 
+  // 部屋参加イベント
   socket.on('joinRoom', (data) => {
     const { playerName, roomId } = data;
     const players = getPlayersInRoom(roomId);
@@ -63,6 +54,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ゲーム開始イベント
   socket.on('startGame', (roomId) => {
     const players = getPlayersInRoom(roomId);
     if (players.length === 2) {
@@ -71,6 +63,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // カードプレイイベント
   socket.on('playCard', (data) => {
     const { roomId, playerName, cardIndex } = data;
     const players = getPlayersInRoom(roomId);
@@ -82,6 +75,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // プレイヤー切断時
   socket.on('disconnect', () => {
     removePlayer(socket.id);
     console.log('A user disconnected:', socket.id);
