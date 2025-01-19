@@ -8,11 +8,11 @@ const io = socketIo(server);
 const port = process.env.PORT || 3000;
 
 // 静的ファイルをpublicディレクトリから提供
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));  // 修正ポイント
 
 // ルートへのGETリクエストでindex.htmlを返す
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));  // 修正ポイント
 });
 
 const { generateRoomId, generateDeck, dealCards } = require('./gameLogic');
