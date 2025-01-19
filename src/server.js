@@ -1,5 +1,15 @@
-const express = require('express');
+const fs = require('fs');
 const path = require('path');
+
+fs.readdirSync(path.join(__dirname, '..')).forEach(file => {
+  console.log(file);  // ディレクトリ内のファイル一覧を表示
+});
+
+fs.readdirSync(path.join(__dirname, '..', 'public')).forEach(file => {
+  console.log('public folder contains:', file);  // publicフォルダ内のファイル一覧を表示
+});
+
+const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const app = express();
@@ -7,12 +17,13 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const port = process.env.PORT || 3000;
 
-// 静的ファイルをpublicディレクトリから提供
-app.use(express.static(path.join(__dirname, '..',  '..', 'public')));  // 修正ポイント
+// デバッグ: publicフォルダを明示的に確認
+app.use('/static', express.static(path.join(__dirname, '..', 'public')));
 
-// ルートへのGETリクエストでindex.htmlを返す
+// ルートにアクセスしたときにindex.htmlを返す
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..',  '..', 'public', 'index.html'));  // 修正ポイント
+  console.log('Accessing /');
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 const { generateRoomId, generateDeck, dealCards } = require('./gameLogic');
