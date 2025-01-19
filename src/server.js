@@ -18,12 +18,12 @@ const io = socketIo(server);
 const port = process.env.PORT || 3000;
 
 // デバッグ: publicフォルダを明示的に確認
-app.use('/static', express.static(path.join(__dirname, '..', 'public')));
+app.use('/static', express.static(path.join(__dirname,'..', '..', 'public')));
 
 // ルートにアクセスしたときにindex.htmlを返す
 app.get('/', (req, res) => {
   console.log('Accessing /');
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', '..', 'public', 'index.html'));
 });
 
 const { generateRoomId, generateDeck, dealCards } = require('./gameLogic');
