@@ -57,11 +57,13 @@ io.on('connection', (socket) => {
   // ゲーム開始イベント
   socket.on('startGame', (roomId) => {
     const players = getPlayersInRoom(roomId);
-    if (players.length === 2) {
+    if (players.length > 0) {
+      const dealtCards = dealCards(players);
       io.to(roomId).emit('gameStarted', { currentPlayer: 0 });
-      io.to(roomId).emit('dealCards', dealCards(players));
+      io.to(roomId).emit('dealCards', dealtCards);
     }
   });
+  
 
   // カードプレイイベント
   socket.on('playCard', (data) => {

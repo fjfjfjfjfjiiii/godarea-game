@@ -1,8 +1,3 @@
-// ゲームのロジック
-function generateRoomId() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
-
 function generateDeck() {
   return [
     { name: 'Attack Card', damage: 5 },
@@ -12,10 +7,11 @@ function generateDeck() {
 }
 
 function dealCards(players) {
+  const deck = generateDeck(); // 1つのデッキを作成
   return players.map(player => ({
     player: player.name,
-    hand: [generateDeck()[0], generateDeck()[1], generateDeck()[2]]
+    hand: [...deck] // 同じデッキを全プレイヤーに配布
   }));
 }
 
-module.exports = { generateRoomId, generateDeck, dealCards };
+module.exports = { generateDeck, dealCards };

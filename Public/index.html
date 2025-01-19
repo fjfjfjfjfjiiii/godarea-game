@@ -82,10 +82,15 @@
     });
 
     // カード配布
-    socket.on('dealCards', (cards) => {
-      hand = cards;
-      renderHand();
-    });
+    socket.on('dealCards', (data) => {
+  // プレイヤー名が一致するデータの手札を取得
+  const playerData = data.find(p => p.player === playerName);
+  if (playerData) {
+    hand = playerData.hand; // 正しい手札を代入
+    renderHand();
+  }
+});
+
 
     // カードプレイ結果
     socket.on('cardPlayed', (data) => {
@@ -138,22 +143,37 @@
       socket.emit('startGame', roomId);
     });
 
-    // 手札の表示
     function renderHand() {
-      $('#hand').empty();
-      hand.forEach((card, index) => {
-        $('#hand').append(`
-          <div class="card" data-index="${index}">
-            ${card.name} (Damage: ${card.damage})
-          </div>
-        `);
-      });
+  $('#hand').empty();
+  if (hand.length > 0) {
+    hand.forEach((card, index) => {
+      $('#hand').append(`
+        <div class="card" data-index="${index}">
+          ${card.name} (Damage: ${card.damage})
+        </div>
+      `);
+    });
 
-      $('.card').click(function () {
-        const cardIndex = $(this).data('index');
-        playCard(cardIndex);
-      });
-    }
+    // カードクリック時に選択する機能
+    $('.card').click(function () {
+      const cardIndex = $(this).data('index');
+      playCard(cardIndex);
+    });
+  } else {
+    $('#hand').append('<p>No cards in hand</p>');
+  }
+}
+
+$('#playCard').click(() => {
+  const cardIndex = 0; // 選択するカードのインデックス（仮定的）
+  socket.emit('playCard', { roomId, playerName, cardIndex });
+});
+
+$('#nextTurn').click(() => {
+  socket.emit('nextTurn', roomId);
+});
+
+
 
     // カードプレイ
     function playCard(cardIndex) {
